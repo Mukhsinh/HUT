@@ -40,9 +40,9 @@ export default function KegiatanPage() {
                 .insert([{
                     title: formData.title,
                     date: formData.date,
-                    time: formData.time,
                     location: formData.location,
-                    description: formData.description,
+                    pic_name: formData.pic_name,
+                    description: formData.description + (formData.time ? `\nWaktu: ${formData.time}` : ""),
                     status: "Planned"
                 }])
                 .select();
@@ -56,7 +56,7 @@ export default function KegiatanPage() {
                     .insert([{
                         event_id: eventData[0].id,
                         name: formData.pic_name,
-                        role: "PIC",
+                        division: "PIC",
                         phone: formData.pic_phone
                     }]);
                 if (commError) throw commError;
@@ -65,9 +65,9 @@ export default function KegiatanPage() {
             setIsAddModalOpen(false);
             setFormData({ title: "", date: "", time: "", location: "", pic_name: "", pic_phone: "", description: "" });
             window.location.reload();
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            alert("Berhasil disimpan (Simulasi)");
+            alert("Gagal menyimpan data: " + (err.message || "Kesalahan koneksi database"));
             setIsAddModalOpen(false);
         } finally {
             setIsLoading(false);
@@ -90,20 +90,29 @@ export default function KegiatanPage() {
             if (error) throw error;
 
             // Format divisions into the previous structure
-            const formattedEvents = data?.map((e: any) => ({
-                id: e.id,
-                title: e.title,
-                date: new Date(e.date).toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' }),
-                time: e.time,
-                location: e.location,
-                status: e.status,
-                color: e.status === "On Progress" ? "bg-blue-100 text-blue-600" : "bg-amber-100 text-amber-600",
-                divisions: e.committees?.map((c: any) => ({
-                    name: c.role,
-                    pic: c.name,
-                    phone: c.phone
-                })) || []
-            })) || [];
+            const formattedEvents = data?.map((e: any) => {
+                let extractedTime = "TBA";
+                let desc = e.description || "";
+                if (desc.includes("Waktu:")) {
+                    const parts = desc.split("Waktu:");
+                    extractedTime = parts[1].trim();
+                }
+
+                return {
+                    id: e.id,
+                    title: e.title,
+                    date: new Date(e.date).toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' }),
+                    time: extractedTime,
+                    location: e.location,
+                    status: e.status,
+                    color: e.status === "On Progress" ? "bg-blue-100 text-blue-600" : "bg-amber-100 text-amber-600",
+                    divisions: e.committees?.map((c: any) => ({
+                        name: c.division || "PIC",
+                        pic: c.name,
+                        phone: c.phone
+                    })) || []
+                };
+            }) || [];
 
             setEvents(formattedEvents);
         } catch (err) {

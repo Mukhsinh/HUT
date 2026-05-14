@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Calendar, Wallet, FileText } from "lucide-react";
+import { Home, Calendar, Camera, Wallet, FileText } from "lucide-react";
 
 const navItems = [
   { name: "Beranda", href: "/", icon: Home },
   { name: "Kegiatan", href: "/kegiatan", icon: Calendar },
+  { name: "Galeri", href: "/galeri", icon: Camera },
   { name: "Keuangan", href: "/keuangan", icon: Wallet },
   { name: "Laporan", href: "/laporan", icon: FileText },
 ];
@@ -24,14 +25,12 @@ export default function BottomNav() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 ${
-                isActive ? "text-primary" : "text-muted-foreground"
-              }`}
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 ${isActive ? "text-primary" : "text-muted-foreground"
+                }`}
             >
               <div
-                className={`p-1.5 rounded-full transition-colors ${
-                  isActive ? "bg-secondary text-primary" : ""
-                }`}
+                className={`p-1.5 rounded-full transition-colors ${isActive ? "bg-secondary text-primary" : ""
+                  }`}
               >
                 <Icon size={24} />
               </div>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
+import EventNotifier from "@/components/EventNotifier";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -39,16 +40,20 @@ export default function RootLayout({
               </div>
               <span className="font-semibold text-sm">HUT IBI Pekalongan</span>
             </div>
-            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-primary text-xs font-medium">
-              AY
+            <div className="flex items-center space-x-2 bg-secondary/50 px-3 py-1 rounded-full border border-primary/10">
+              <span className="text-sm font-semibold text-primary">Sarah</span>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 pb-20 max-w-md mx-auto w-full px-4 pt-4">
-          {children}
+        <main className="flex-1 pb-24 max-w-md mx-auto w-full px-4 pt-4 flex flex-col">
+          <div className="flex-1">{children}</div>
+          <footer className="mt-8 mb-4 text-center">
+            <p className="text-[10px] text-muted-foreground font-medium">Sarah@2026. IBI Cab Kota Pekalongan</p>
+          </footer>
         </main>
 
+        <EventNotifier />
         <BottomNav />
       </body>
     </html>
