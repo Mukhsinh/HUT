@@ -2,14 +2,21 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
+import { FullscreenFormModal } from "@/components/FullscreenFormModal";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
-import { Plus, ArrowUpRight, ArrowDownRight, Wallet, X, Loader2 } from "lucide-react";
+import { Plus, ArrowUpRight, ArrowDownRight, Wallet, Loader2, Lock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { getCookie } from "cookies-next";
+import { getRoleFromCookie } from "@/lib/permissions";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function FinanceDashboard() {
+    const [role, setRole] = useState<"super_admin" | "staf" | null>(null);
+    const canAddTransactions = role === "super_admin";
+    const canEditTransactions = role === "super_admin";
+    
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [transactionType, setTransactionType] = useState<"income" | "expense">("income");
     const [isLoading, setIsLoading] = useState(false);
@@ -69,6 +76,12 @@ export default function FinanceDashboard() {
     const [budgetTarget, setBudgetTarget] = useState("50000000");
 
     useEffect(() => {
+        const authSession = getCookie("auth_session");
+        if (authSession) {
+            const userRole = getRoleFromCookie(String(authSession));
+            setRole(userRole);
+        }
+        
         const savedBudget = localStorage.getItem("ibi_budget");
         if (savedBudget) {
             setBudgetTarget(savedBudget);
@@ -134,119 +147,131 @@ export default function FinanceDashboard() {
                         setFormData({ amount: "", category: "Sponsorship", description: "", proof: "" });
                         setIsAddModalOpen(true);
                     }}
-                    className="bg-primary text-white px-4 py-2.5 rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95 flex items-center gap-2"
+                    disabled={!canAddTransactions}
+                    title={!canAddTransactions ? "Anda tidak memiliki akses untuk menambah transaksi" : ""}
+                    className={`${canAddTransactions 
+                        ? "bg-primary text-white hover:scale-105 active:scale-95 cursor-pointer" 
+                        : "bg-gray-400 text-white cursor-not-allowed opacity-60"
+                    } px-4 py-2.5 rounded-2xl shadow-lg shadow-primary/20 transition-transform flex items-center gap-2`}
                 >
-                    <Plus size={20} />
-                    <span className="text-sm font-bold hidden sm:inline">Catat Transaksi</span>
+                    {canAddTransactions ? (
+                        <>
+                            <Plus size={20} />
+                            <span className="text-sm font-bold hidden sm:inline">Catat Transaksi</span>
+                        </>
+                    ) : (
+                        <>
+                            <Lock size={20} />
+                            <span className="text-sm font-bold hidden sm:inline">Akses Terbatas</span>
+                        </>
+                    )}
                 </button>
             </section>
 
             {/* Modal Tambah/Edit Transaksi */}
-            {isAddModalOpen && (
-                <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-end justify-center sm:items-center p-0 sm:p-4">
-                    <div className="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl relative animate-in slide-in-from-bottom duration-300">
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-bold">{editingId ? "Edit Transaksi" : "Catat Transaksi Baru"}</h2>
-                                <button onClick={() => setIsAddModalOpen(false)} className="p-2 hover:bg-secondary rounded-full">
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Tipe Transaksi</label>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button
-                                            type="button"
-                                            onClick={() => setTransactionType("income")}
-                                            className={`py-3 rounded-xl border-2 font-bold text-sm transition-all ${transactionType === "income"
-                                                ? "border-primary bg-primary/5 text-primary"
-                                                : "border-transparent bg-muted text-muted-foreground"
-                                                }`}
-                                        >
-                                            Pemasukan
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setTransactionType("expense")}
-                                            className={`py-3 rounded-xl border-2 font-bold text-sm transition-all ${transactionType === "expense"
-                                                ? "border-rose-500 bg-rose-50 text-rose-500"
-                                                : "border-transparent bg-muted text-muted-foreground"
-                                                }`}
-                                        >
-                                            Pengeluaran
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Nominal (Rp)</label>
-                                    <input
-                                        type="number"
-                                        required
-                                        value={formData.amount}
-                                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                                        placeholder="Contoh: 1000000"
-                                        className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Kategori</label>
-                                    <select
-                                        value={formData.category}
-                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                        className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                    >
-                                        <option>Sponsorship</option>
-                                        <option>Registrasi Peserta</option>
-                                        <option>Hibah/Donasi</option>
-                                        <option>Konsumsi</option>
-                                        <option>Perlengkapan</option>
-                                        <option>Iuran</option>
-                                        <option>Lainnya</option>
-                                    </select>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-rose-500">Keterangan: {editingId ? "(Bukti Transaksi lama tetap tersimpan)" : "(Opsional)"}</label>
-                                    <input
-                                        type="file"
-                                        accept="image/*,.pdf"
-                                        onChange={(e) => {
-                                            if (e.target.files && e.target.files[0]) {
-                                                const file = e.target.files[0];
-                                                const reader = new FileReader();
-                                                reader.onloadend = () => {
-                                                    setFormData({ ...formData, proof: reader.result as string });
-                                                };
-                                                reader.readAsDataURL(file);
-                                            }
-                                        }}
-                                        className="w-full p-3 bg-muted/30 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Keterangan</label>
-                                    <textarea
-                                        value={formData.description}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        placeholder="Detail transaksi..."
-                                        rows={3}
-                                        className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                    ></textarea>
-                                </div>
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/30 mt-4 active:scale-95 transition-transform disabled:opacity-50 flex items-center justify-center cursor-pointer"
-                                >
-                                    {isLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : null}
-                                    {editingId ? "Update Perubahan" : "Simpan Transaksi"}
-                                </button>
-                            </form>
+            <FullscreenFormModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                title={editingId ? "Edit Transaksi" : "Catat Transaksi Baru"}
+                subtitle="Catat semua pemasukan dan pengeluaran dengan detail lengkap"
+                isLoading={isLoading}
+            >
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold">Tipe Transaksi</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setTransactionType("income")}
+                                className={`py-4 rounded-xl border-2 font-bold text-sm transition-all ${transactionType === "income"
+                                    ? "border-primary bg-primary/5 text-primary"
+                                    : "border-transparent bg-muted text-muted-foreground"
+                                    }`}
+                            >
+                                Pemasukan
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setTransactionType("expense")}
+                                className={`py-4 rounded-xl border-2 font-bold text-sm transition-all ${transactionType === "expense"
+                                    ? "border-rose-500 bg-rose-50 text-rose-500"
+                                    : "border-transparent bg-muted text-muted-foreground"
+                                    }`}
+                            >
+                                Pengeluaran
+                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold">Nominal (Rp)</label>
+                        <input
+                            type="number"
+                            required
+                            value={formData.amount}
+                            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                            placeholder="Contoh: 1000000"
+                            className="w-full p-4 bg-muted/30 border border-border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold">Kategori</label>
+                        <select
+                            value={formData.category}
+                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                            className="w-full p-4 bg-muted/30 border border-border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        >
+                            <option>Sponsorship</option>
+                            <option>Registrasi Peserta</option>
+                            <option>Hibah/Donasi</option>
+                            <option>Konsumsi</option>
+                            <option>Perlengkapan</option>
+                            <option>Iuran</option>
+                            <option>Lainnya</option>
+                        </select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold">Keterangan: {editingId ? "(Bukti Transaksi lama tetap tersimpan)" : "(Opsional)"}</label>
+                        <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                    const file = e.target.files[0];
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                        setFormData({ ...formData, proof: reader.result as string });
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            }}
+                            className="w-full p-3 bg-muted/30 border border-border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold">Deskripsi/Catatan</label>
+                        <textarea
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Detail transaksi..."
+                            rows={4}
+                            className="w-full p-4 bg-muted/30 border border-border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                        ></textarea>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/30 active:scale-95 transition-transform disabled:opacity-50 flex items-center justify-center cursor-pointer sticky bottom-6"
+                    >
+                        {isLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : null}
+                        {editingId ? "Update Perubahan" : "Simpan Transaksi"}
+                    </button>
+                </form>
+            </FullscreenFormModal>
 
             <Card className="relative overflow-hidden bg-primary text-white border-none shadow-xl shadow-primary/10">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
@@ -390,12 +415,14 @@ export default function FinanceDashboard() {
                                     <p className={`font-bold text-sm ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
                                         {t.type === 'income' ? '+' : '-'} Rp {t.amount.toLocaleString("id-ID")}
                                     </p>
-                                    <button
-                                        onClick={() => handleEdit(t)}
-                                        className="text-[10px] font-bold text-primary mt-1 hover:underline"
-                                    >
-                                        Edit
-                                    </button>
+                                    {canEditTransactions && (
+                                        <button
+                                            onClick={() => handleEdit(t)}
+                                            className="text-[10px] font-bold text-primary mt-1 hover:underline"
+                                        >
+                                            Edit
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}

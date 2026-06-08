@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
+import { FullscreenFormModal } from "@/components/FullscreenFormModal";
 import {
     Calendar,
     MapPin,
@@ -11,7 +12,6 @@ import {
     Plus,
     Search,
     ChevronRight,
-    X,
     Clock,
     Loader2
 } from "lucide-react";
@@ -154,109 +154,113 @@ export default function KegiatanPage() {
             </section>
 
             {/* Modal Tambah Kegiatan */}
-            {isAddModalOpen && (
-                <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-end justify-center sm:items-center p-0 sm:p-4">
-                    <div className="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl relative animate-in slide-in-from-bottom duration-300">
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-bold">Tambah Kegiatan HUT</h2>
-                                <button onClick={() => setIsAddModalOpen(false)} className="p-2 hover:bg-secondary rounded-full">
-                                    <X size={20} />
-                                </button>
-                            </div>
+            <FullscreenFormModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                title="Tambah Kegiatan HUT"
+                subtitle="Isi data lengkap untuk kegiatan baru"
+                isLoading={isLoading}
+            >
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold">Nama Kegiatan</label>
+                        <input
+                            type="text"
+                            required
+                            value={formData.title}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                            placeholder="Contoh: Seminar Kebidanan..."
+                            className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-base"
+                        />
+                    </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Nama Kegiatan</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formData.title}
-                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                        placeholder="Contoh: Seminar Kebidanan..."
-                                        className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-primary/70 flex items-center"><Calendar size={14} className="mr-1" /> Tanggal</label>
-                                        <input
-                                            type="date"
-                                            required
-                                            value={formData.date}
-                                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                            className="w-full p-4 bg-muted/30 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-primary/70 flex items-center"><Clock size={14} className="mr-1" /> Waktu</label>
-                                        <input
-                                            type="time"
-                                            required
-                                            value={formData.time}
-                                            onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                                            className="w-full p-4 bg-muted/30 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold flex items-center"><MapPin size={14} className="mr-1" /> Lokasi</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formData.location}
-                                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                        placeholder="Contoh: Hotel Santika..."
-                                        className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold">Nama PIC / Panitia</label>
-                                        <input
-                                            type="text"
-                                            required
-                                            value={formData.pic_name}
-                                            onChange={(e) => setFormData({ ...formData, pic_name: e.target.value })}
-                                            placeholder="Siti Rahma..."
-                                            className="w-full p-4 bg-muted/30 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold">WhatsApp (62...)</label>
-                                        <input
-                                            type="text"
-                                            required
-                                            value={formData.pic_phone}
-                                            onChange={(e) => setFormData({ ...formData, pic_phone: e.target.value })}
-                                            placeholder="62812..."
-                                            className="w-full p-4 bg-muted/30 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Deskripsi / Catatan</label>
-                                    <textarea
-                                        value={formData.description}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        placeholder="Detail kegiatan..."
-                                        rows={3}
-                                        className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                    ></textarea>
-                                </div>
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/30 mt-4 active:scale-95 transition-transform flex items-center justify-center disabled:opacity-50"
-                                >
-                                    {isLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : null}
-                                    Simpan Kegiatan
-                                </button>
-                            </form>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-primary/70 flex items-center">
+                                <Calendar size={14} className="mr-1" /> Tanggal
+                            </label>
+                            <input
+                                type="date"
+                                required
+                                value={formData.date}
+                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                className="w-full p-4 bg-muted/30 border border-border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-primary/70 flex items-center">
+                                <Clock size={14} className="mr-1" /> Waktu
+                            </label>
+                            <input
+                                type="time"
+                                required
+                                value={formData.time}
+                                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                                className="w-full p-4 bg-muted/30 border border-border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
                         </div>
                     </div>
-                </div>
-            )}
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold flex items-center">
+                            <MapPin size={14} className="mr-1" /> Lokasi
+                        </label>
+                        <input
+                            type="text"
+                            required
+                            value={formData.location}
+                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                            placeholder="Contoh: Hotel Santika..."
+                            className="w-full p-4 bg-muted/30 border border-border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold">Nama PIC / Panitia</label>
+                            <input
+                                type="text"
+                                required
+                                value={formData.pic_name}
+                                onChange={(e) => setFormData({ ...formData, pic_name: e.target.value })}
+                                placeholder="Siti Rahma..."
+                                className="w-full p-4 bg-muted/30 border border-border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold">WhatsApp (62...)</label>
+                            <input
+                                type="text"
+                                required
+                                value={formData.pic_phone}
+                                onChange={(e) => setFormData({ ...formData, pic_phone: e.target.value })}
+                                placeholder="62812..."
+                                className="w-full p-4 bg-muted/30 border border-border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold">Deskripsi / Catatan</label>
+                        <textarea
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Detail kegiatan..."
+                            rows={4}
+                            className="w-full p-4 bg-muted/30 border border-border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                        ></textarea>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/30 active:scale-95 transition-transform flex items-center justify-center disabled:opacity-50 sticky bottom-6"
+                    >
+                        {isLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : null}
+                        {isLoading ? "Menyimpan..." : "Simpan Kegiatan"}
+                    </button>
+                </form>
+            </FullscreenFormModal>
 
             <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-muted-foreground">
