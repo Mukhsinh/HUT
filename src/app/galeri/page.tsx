@@ -125,7 +125,8 @@ export default function Galeri() {
                     <p className="text-muted-foreground text-sm">Dokumentasi HUT IBI ke-75</p>
                 </div>
 
-                <div className="mt-6 bg-white p-5 rounded-2xl shadow-sm border border-border">
+                {/* On desktop: upload form sits in a contained card on the left */}
+                <div className="mt-6 bg-white p-5 rounded-2xl shadow-sm border border-border md:max-w-lg">
                     <h2 className="text-sm font-bold mb-4">Upload Dokumentasi Baru</h2>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -230,7 +231,7 @@ export default function Galeri() {
                         <p className="text-sm">Belum ada dokumentasi tersimpan.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {galleries.map((item) => (
                             <div key={item.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-border">
                                 <div className="relative aspect-square w-full">

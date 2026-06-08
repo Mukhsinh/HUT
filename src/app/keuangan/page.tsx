@@ -134,9 +134,10 @@ export default function FinanceDashboard() {
                         setFormData({ amount: "", category: "Sponsorship", description: "", proof: "" });
                         setIsAddModalOpen(true);
                     }}
-                    className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95"
+                    className="bg-primary text-white px-4 py-2.5 rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95 flex items-center gap-2"
                 >
-                    <Plus size={24} />
+                    <Plus size={20} />
+                    <span className="text-sm font-bold hidden sm:inline">Catat Transaksi</span>
                 </button>
             </section>
 
@@ -260,7 +261,7 @@ export default function FinanceDashboard() {
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="bg-white">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between">
@@ -281,8 +282,28 @@ export default function FinanceDashboard() {
                         <p className="text-lg font-bold">Rp {totals.expense.toLocaleString("id-ID")}</p>
                     </CardContent>
                 </Card>
+                <Card className="bg-white hidden lg:block">
+                    <CardContent className="p-4">
+                        <div className="flex items-center space-x-2 text-emerald-600 mb-1">
+                            <Wallet size={16} />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Saldo Bersih</span>
+                        </div>
+                        <p className="text-lg font-bold">Rp {totals.balance.toLocaleString("id-ID")}</p>
+                    </CardContent>
+                </Card>
+                <Card className="bg-white hidden lg:block">
+                    <CardContent className="p-4">
+                        <div className="flex items-center space-x-2 text-amber-500 mb-1">
+                            <ArrowUpRight size={16} />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Realisasi</span>
+                        </div>
+                        <p className="text-lg font-bold">{budgetVal > 0 ? Math.round((totals.expense / budgetVal) * 100) : 0}%</p>
+                        <p className="text-[10px] text-muted-foreground">dari pagu anggaran</p>
+                    </CardContent>
+                </Card>
             </div>
 
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <h3 className="font-semibold">Realisasi RKA</h3>
@@ -342,8 +363,8 @@ export default function FinanceDashboard() {
                 </div>
             </Card>
 
-            <Card className="border-none shadow-none bg-transparent">
-                <CardHeader className="p-0 mb-4 flex flex-row items-center justify-between">
+            <Card className="border-none shadow-none bg-transparent lg:border lg:shadow-sm lg:bg-white">
+                <CardHeader className="p-0 lg:px-5 lg:pt-5 mb-4 flex flex-row items-center justify-between">
                     <h3 className="font-bold text-lg">History Transaksi</h3>
                     <button
                         onClick={() => setShowTransactions(!showTransactions)}
@@ -353,7 +374,7 @@ export default function FinanceDashboard() {
                     </button>
                 </CardHeader>
                 {showTransactions && (
-                    <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300 lg:px-5 lg:pb-5 max-h-96 overflow-y-auto">
                         {transactions.map((t) => (
                             <div key={t.id} className="bg-white p-4 rounded-2xl flex items-center justify-between border border-primary/5 shadow-sm">
                                 <div className="flex items-center space-x-3">
@@ -384,6 +405,7 @@ export default function FinanceDashboard() {
                     </div>
                 )}
             </Card>
+            </div>
         </div>
     );
 }

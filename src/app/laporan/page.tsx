@@ -210,10 +210,10 @@ export default function LaporanPage() {
                 <h1 className="text-2xl font-bold">Laporan & LPJ</h1>
                 <p className="text-muted-foreground text-sm">Automated Digital Reporting IBI</p>
 
-                <div className="pt-4">
+                <div className="pt-4 flex flex-col md:flex-row gap-3">
                     <button
                         onClick={handleGenerateFullLPJ}
-                        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-xl transition-all shadow-lg flex flex-col items-center justify-center space-y-1"
+                        className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-xl transition-all shadow-lg flex flex-col items-center justify-center space-y-1"
                     >
                         <div className="flex items-center space-x-2">
                             <FileArchive size={20} />
@@ -224,14 +224,14 @@ export default function LaporanPage() {
 
                     <button
                         onClick={handleExportProofs}
-                        className="w-full mt-3 bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 font-semibold py-3 rounded-xl transition-all flex items-center justify-center text-sm shadow-sm"
+                        className="flex-1 bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 font-semibold py-3 rounded-xl transition-all flex items-center justify-center text-sm shadow-sm"
                     >
                         <FileText size={16} className="mr-2" /> Lampiran Dokumentasi Bukti Transaksi
                     </button>
                 </div>
             </section>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {reports.map((report) => (
                     <Card key={report.id} className="border-border/40 overflow-hidden shadow-sm">
                         <CardHeader className="flex flex-row items-center justify-between py-4 bg-muted/20">

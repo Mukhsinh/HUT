@@ -146,9 +146,10 @@ export default function KegiatanPage() {
                 </div>
                 <button
                     onClick={() => setIsAddModalOpen(true)}
-                    className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20"
+                    className="bg-primary text-white px-4 py-2.5 rounded-2xl shadow-lg shadow-primary/20 flex items-center gap-2"
                 >
-                    <Plus size={24} />
+                    <Plus size={20} />
+                    <span className="text-sm font-bold hidden sm:inline">Tambah Kegiatan</span>
                 </button>
             </section>
 
@@ -268,7 +269,7 @@ export default function KegiatanPage() {
                 />
             </div>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {events.map((event) => (
                     <Card key={event.id} className="border-border/40">
                         <CardHeader className="flex flex-row items-center justify-between py-4">

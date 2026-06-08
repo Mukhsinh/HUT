@@ -60,18 +60,37 @@ export default function Home() {
   return (
     <div className="space-y-6">
       {/* Header Sapaan */}
-      <section>
-        <h1 className="text-xl font-bold text-foreground">Selamat Siang, Ibu Bidan! 👋</h1>
-        <p className="text-muted-foreground text-sm">Mari sukseskan HUT IBI Ke-75 Kota Pekalongan.</p>
+      <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h1 className="text-xl lg:text-2xl font-bold text-foreground">Selamat Siang, Ibu Bidan! 👋</h1>
+          <p className="text-muted-foreground text-sm">Mari sukseskan HUT IBI Ke-75 Kota Pekalongan.</p>
+        </div>
+        {/* Desktop quick-action buttons (inline, not floating) */}
+        <div className="hidden lg:flex items-center gap-3">
+          <Link
+            href="/keuangan"
+            className="bg-white text-primary px-4 py-2.5 rounded-xl shadow-sm border border-primary/20 flex items-center space-x-2 hover:bg-secondary/30 transition-colors"
+          >
+            <span className="text-sm font-bold whitespace-nowrap">Catat Keuangan</span>
+            <Plus size={18} />
+          </Link>
+          <Link
+            href="/kegiatan"
+            className="bg-primary text-white px-4 py-2.5 rounded-xl shadow-md shadow-primary/20 hover:bg-primary/90 transition-colors flex items-center space-x-2"
+          >
+            <span className="text-sm font-bold">Tambah Kegiatan</span>
+            <Plus size={18} />
+          </Link>
+        </div>
       </section>
 
       {/* Finance Quick Widget */}
       <Card className="bg-primary text-white border-none shadow-lg shadow-primary/20">
-        <CardContent className="p-5">
+        <CardContent className="p-5 lg:p-6">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-secondary/80 text-xs font-medium uppercase tracking-wider">Sisa Anggaran Terkini</p>
-              <h2 className="text-2xl font-bold mt-1">Rp {finance.balance.toLocaleString("id-ID")}</h2>
+              <h2 className="text-2xl lg:text-3xl font-bold mt-1">Rp {finance.balance.toLocaleString("id-ID")}</h2>
             </div>
             <Link href="/keuangan" className="bg-white/20 p-2 rounded-lg hover:bg-white/30 transition-colors">
               <ArrowRight size={20} />
@@ -91,9 +110,9 @@ export default function Home() {
           <Link href="/kegiatan" className="text-primary text-xs font-semibold">Lihat Semua</Link>
         </div>
 
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {isLoading ? (
-            <div className="flex justify-center py-8">
+            <div className="lg:col-span-3 flex justify-center py-8">
               <Loader2 className="animate-spin text-primary" size={24} />
             </div>
           ) : upcomingEvents.length > 0 ? (
@@ -115,7 +134,7 @@ export default function Home() {
 
                   <h4 className="font-bold text-base leading-tight mb-3">{event.title}</h4>
 
-                  <div className="flex items-center text-muted-foreground text-xs space-x-4">
+                  <div className="flex flex-wrap items-center text-muted-foreground text-xs gap-3">
                     <div className="flex items-center">
                       <MapPin size={14} className="mr-1 text-primary/70" />
                       {event.location}
@@ -131,13 +150,13 @@ export default function Home() {
               </Card>
             ))
           ) : (
-            <p className="text-center text-xs text-muted-foreground py-8">Belum ada agenda agenda terdekat.</p>
+            <p className="lg:col-span-3 text-center text-xs text-muted-foreground py-8">Belum ada agenda terdekat.</p>
           )}
         </div>
       </section>
 
-      {/* Floating Action Button (Quick Actions) */}
-      <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end space-y-4">
+      {/* Floating Action Button — mobile only */}
+      <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end space-y-4 lg:hidden">
         <Link
           href="/keuangan"
           className="bg-white text-primary p-3 rounded-xl shadow-lg border border-primary/20 flex items-center space-x-2 animate-in slide-in-from-right-10 duration-300"
@@ -149,7 +168,7 @@ export default function Home() {
           href="/kegiatan"
           className="bg-primary text-white p-4 rounded-2xl shadow-xl shadow-primary/30 active:scale-95 transition-transform flex items-center space-x-2"
         >
-          <span className="text-sm font-bold">Tambah Kagiatan</span>
+          <span className="text-sm font-bold">Tambah Kegiatan</span>
           <Plus size={24} />
         </Link>
       </div>
