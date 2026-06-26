@@ -19,7 +19,7 @@ export async function loginAction(prevState: any, formData: FormData) {
     if (email === "sarahsafitri33@gmail.com" && password === "Pekalongan33") {
         userRole = "super_admin";
         userName = "Sarah Safitri";
-    } else if (email === "panitia@bidan.com" && password === "12345") {
+    } else if (email === "panitia@bidan.com" && password === "bidan123") {
         userRole = "staf";
         userName = "Panitia";
     }

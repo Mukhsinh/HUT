@@ -1,268 +1,116 @@
 "use client";
 
-import React, { useState, useActionState, useEffect } from "react";
+import React, { useState, useActionState } from "react";
 import { Card, CardContent } from "@/components/ui/Card";
-import { Loader2, Lock, Mail, ShieldCheck, UserPlus, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { loginAction } from "./actions";
 
 export default function LoginPage() {
-    const [mode, setMode] = useState<"login" | "register">("login");
     const [showPassword, setShowPassword] = useState(false);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [fullName, setFullName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [isRegistering, setIsRegistering] = useState(false);
-    const [registerError, setRegisterError] = useState("");
 
     // Modern React 19 form state handling
     const [state, formAction, isPending] = useActionState(loginAction, null);
 
-    const handleRegister = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsRegistering(true);
-        setRegisterError("");
-
-        if (!fullName.trim()) {
-            setRegisterError("Nama lengkap harus diisi");
-            setIsRegistering(false);
-            return;
-        }
-
-        if (!phone.trim() || phone.length < 10) {
-            setRegisterError("Nomor WhatsApp harus valid (minimal 10 digit)");
-            setIsRegistering(false);
-            return;
-        }
-
-        // Refactored to be instant (Fast & Responsive)
-        try {
-            const pendingUsers = JSON.parse(localStorage.getItem("pending_users") || "[]");
-            const existingEmail = pendingUsers.some((u: any) => u.email === email);
-
-            if (existingEmail) {
-                setRegisterError("Email sudah terdaftar. Silakan coba login atau gunakan email lain.");
-                setIsRegistering(false);
-                return;
-            }
-
-            const newUser = {
-                id: Date.now().toString(),
-                email,
-                fullName,
-                phone,
-                createdAt: new Date().toISOString(),
-                status: "pending"
-            };
-
-            pendingUsers.push(newUser);
-            localStorage.setItem("pending_users", JSON.stringify(pendingUsers));
-
-            alert("✓ Pendaftaran berhasil!\n\nAkun Anda sedang menunggu verifikasi admin.\nAnda akan menerima notifikasi via WhatsApp setelah disetujui.");
-
-            setMode("login");
-            setEmail("");
-            setPassword("");
-            setFullName("");
-            setPhone("");
-        } catch (err) {
-            setRegisterError("Terjadi kesalahan saat pendaftaran. Silakan coba lagi.");
-        } finally {
-            setIsRegistering(false);
-        }
-    };
-
     return (
-        <div className="fixed inset-0 z-[100] bg-background flex items-center justify-center p-4">
-            <div className="w-full max-w-md space-y-6">
-                {/* Header */}
-                <div className="text-center space-y-2">
-                    <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-primary/20 mb-6 overflow-hidden p-2">
-                        <img src="/logo IBI.png" alt="Logo IBI" className="w-full h-full object-contain" />
-                    </div>
-                    <h1 className="text-2xl font-bold tracking-tight text-primary">HUT IBI Pekalongan</h1>
-                    <p className="text-muted-foreground text-sm font-medium">
-                        {mode === "login"
-                            ? "Masuk untuk mengelola kegiatan & keuangan"
-                            : "Daftarkan akun baru Anda"}
+        <div className="fixed inset-0 z-[100] bg-slate-50 flex items-center justify-center p-4 overflow-hidden">
+            {/* Ambient Background Elements */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-[-1] pointer-events-none">
+                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl" />
+                <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] rounded-full bg-secondary/20 blur-3xl" />
+                <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] rounded-full bg-primary/3 blur-3xl" />
+            </div>
+
+            <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-700">
+                <div className="text-center mb-10">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-primary mb-3">HUT IBI Pekalongan</h1>
+                    <p className="text-muted-foreground text-sm font-medium tracking-wide">
+                        Akses Panel Manajemen Kegiatan & Keuangan
                     </p>
                 </div>
 
-                {/* Form Card */}
-                <Card className="border-border/40 shadow-2xl">
-                    <CardContent className="p-6">
-                        {mode === "login" ? (
-                            <form action={formAction} className="space-y-5">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold flex items-center">
-                                        <Mail size={14} className="mr-2 text-primary" />
+                <Card className="border-none shadow-2xl shadow-primary/10 overflow-hidden bg-white/90 backdrop-blur-md rounded-[2.5rem]">
+                    <CardContent className="p-0">
+                        <div className="px-10 pb-10 pt-10">
+                            <form action={formAction} className="space-y-6">
+                                <div className="space-y-2 group transition-all">
+                                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1 group-focus-within:text-primary">
                                         Email Pengguna
                                     </label>
-                                    <input
-                                        name="email"
-                                        type="email"
-                                        required
-                                        defaultValue={email}
-                                        placeholder="sarahsafitri33@gmail.com"
-                                        className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium text-base"
-                                    />
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors">
+                                            <Mail size={18} />
+                                        </div>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            required
+                                            className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-[1.25rem] focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-sm font-medium"
+                                            placeholder="panitia@bidan.com"
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold flex items-center">
-                                        <Lock size={14} className="mr-2 text-primary" />
+                                <div className="space-y-2 group transition-all">
+                                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1 group-focus-within:text-primary">
                                         Kata Sandi
                                     </label>
                                     <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors">
+                                            <Lock size={18} />
+                                        </div>
                                         <input
-                                            name="password"
                                             type={showPassword ? "text" : "password"}
+                                            name="password"
                                             required
+                                            className="block w-full pl-12 pr-12 py-4 bg-slate-50 border border-slate-100 rounded-[1.25rem] focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-sm font-medium"
                                             placeholder="••••••••"
-                                            className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base pr-12"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-muted-foreground hover:text-primary transition-colors"
                                         >
-                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                         </button>
                                     </div>
                                 </div>
 
                                 {state?.error && (
-                                    <p className="text-xs text-rose-500 font-medium bg-rose-50 p-3 rounded-lg border border-rose-100">
+                                    <div className="bg-rose-50 text-rose-600 p-4 rounded-2xl text-xs font-bold border border-rose-100 animate-in fade-in slide-in-from-top-2 flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
                                         {state.error}
-                                    </p>
+                                    </div>
                                 )}
 
                                 <button
                                     type="submit"
                                     disabled={isPending}
-                                    className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/30 active:scale-95 transition-transform disabled:opacity-50 flex items-center justify-center text-base"
+                                    className="w-full bg-primary hover:bg-primary/95 text-white font-bold py-4.5 rounded-[1.25rem] shadow-xl shadow-primary/20 transition-all hover:shadow-primary/30 active:scale-[0.98] flex items-center justify-center space-x-3 text-sm disabled:opacity-70 h-[3.5rem] mt-2"
                                 >
                                     {isPending ? (
-                                        <Loader2 className="animate-spin mr-2" size={20} />
-                                    ) : (
-                                        "Masuk Sekarang"
-                                    )}
-                                </button>
-                            </form>
-                        ) : (
-                            <form onSubmit={handleRegister} className="space-y-5">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Nama Lengkap</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={fullName}
-                                        onChange={(e) => setFullName(e.target.value)}
-                                        placeholder="Siti Rahma"
-                                        className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-base"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold flex items-center">
-                                        <Mail size={14} className="mr-2 text-primary" />
-                                        Email
-                                    </label>
-                                    <input
-                                        type="email"
-                                        required
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="nama@example.com"
-                                        className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-base"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Nomor WhatsApp</label>
-                                    <input
-                                        type="tel"
-                                        required
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
-                                        placeholder="62812345678"
-                                        className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-base"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold flex items-center">
-                                        <Lock size={14} className="mr-2 text-primary" />
-                                        Kata Sandi
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            type={showPassword ? "text" : "password"}
-                                            required
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            placeholder="••••••••"
-                                            className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-base pr-12"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
-                                        >
-                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {registerError && (
-                                    <p className="text-xs text-rose-500 font-medium bg-rose-50 p-3 rounded-lg border border-rose-100">
-                                        {registerError}
-                                    </p>
-                                )}
-
-                                <button
-                                    type="submit"
-                                    disabled={isRegistering}
-                                    className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/30 active:scale-95 transition-transform disabled:opacity-50 flex items-center justify-center text-base"
-                                >
-                                    {isRegistering ? (
-                                        <Loader2 className="animate-spin mr-2" size={20} />
+                                        <Loader2 className="animate-spin" size={20} />
                                     ) : (
                                         <>
-                                            <UserPlus size={20} className="mr-2" />
-                                            Daftar Sekarang
+                                            <span>Masuk Sekarang</span>
+                                            <ArrowRight size={18} className="translate-x-0 group-hover:translate-x-1 transition-transform" />
                                         </>
                                     )}
                                 </button>
                             </form>
-                        )}
-
-                        {/* Mode Switch — only show back button when in register mode */}
-                        {mode === "register" && (
-                            <div className="mt-6 pt-6 border-t border-border/20">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setMode("login");
-                                        setRegisterError("");
-                                        setEmail("");
-                                        setPassword("");
-                                        setFullName("");
-                                        setPhone("");
-                                    }}
-                                    className="w-full text-primary text-sm font-bold hover:underline flex items-center justify-center gap-2"
-                                >
-                                    <ArrowLeft size={16} />
-                                    Sudah punya akun? Masuk di sini
-                                </button>
-                            </div>
-                        )}
+                        </div>
                     </CardContent>
                 </Card>
 
-                <p className="text-center text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-                    Ikatan Bidan Indonesia © 2026
-                </p>
+                <div className="mt-12 text-center">
+                    <div className="flex items-center justify-center space-x-4 mb-4">
+                        <div className="h-[1px] w-8 bg-slate-200" />
+                        <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-slate-400">Ikatan Bidan Indonesia</span>
+                        <div className="h-[1px] w-8 bg-slate-200" />
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-bold tracking-wider">
+                        IBI Kota Pekalongan @ 2026
+                    </p>
+                </div>
             </div>
         </div>
     );

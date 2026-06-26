@@ -45,11 +45,7 @@ export default async function RootLayout({
           <aside className="hidden md:flex md:flex-col md:w-56 md:fixed md:inset-y-0 md:left-0 md:z-40 bg-white border-r border-border/50 shadow-sm">
             {/* Logo area */}
             <div className="flex items-center space-x-3 px-5 h-16 border-b border-border/50">
-              <img
-                src="/logo%20IBI.png"
-                alt="Logo IBI"
-                className="w-9 h-9 object-contain shrink-0"
-              />
+              <img src="/logoIBI.png" alt="Logo IBI" className="w-9 h-9 object-contain shrink-0" />
               <span className="font-bold text-primary text-sm leading-tight">HUT IBI Pekalongan</span>
             </div>
             {/* Nav links */}
@@ -63,7 +59,7 @@ export default async function RootLayout({
               <div className="flex h-14 items-center px-4 max-w-md mx-auto justify-between">
                 <div className="flex items-center space-x-2">
                   <img
-                    src="/logo%20IBI.png"
+                    src="/logoIBI.png"
                     alt="Logo IBI"
                     className="w-8 h-8 object-contain"
                   />

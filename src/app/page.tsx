@@ -21,24 +21,12 @@ export default function Home() {
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
   const [finance, setFinance] = useState({ balance: 0, percentage: 0 });
   const [isLoading, setIsLoading] = useState(true);
-
-  // Try to pre-load userName from cookie if available to avoid "User" flicker
-  const [userName, setUserName] = useState<string>(() => {
-    try {
-      const session = getCookie("auth_session");
-      if (session) {
-        const parsed = JSON.parse(String(session));
-        if (parsed.name) return parsed.name;
-        if (parsed.email === "sarahsafitri33@gmail.com") return "Sarah Safitri";
-      }
-    } catch (e) { }
-    return "User";
-  });
+  const [userName, setUserName] = useState("User");
 
   useEffect(() => {
     fetchDashboardData();
 
-    // Client-side refresh for user data consistency
+    // Client-side only refresh to resolve user data and avoid hydration mismatch
     const session = getCookie("auth_session");
     if (session) {
       try {
