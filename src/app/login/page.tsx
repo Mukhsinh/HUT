@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useActionState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Loader2, Lock, Mail, ShieldCheck, UserPlus, ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { setCookie } from "cookies-next";
+import { loginAction } from "./actions";
 
 export default function LoginPage() {
     const [mode, setMode] = useState<"login" | "register">("login");
@@ -12,96 +11,64 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState("");
     const [phone, setPhone] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
-    const router = useRouter();
+    const [isRegistering, setIsRegistering] = useState(false);
+    const [registerError, setRegisterError] = useState("");
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError("");
-
-        // Simulated localized auth based on user requirements
-        setTimeout(() => {
-            let userRole = null;
-            let userName = null;
-            
-            if (email === "sarahsafitri33@gmail.com" && password === "Pekalongan33") {
-                userRole = "super_admin";
-                userName = "Sarah Safitri";
-            } else if (email === "panitia@bidan.com" && password === "12345") {
-                userRole = "staf";
-                userName = "Panitia";
-            }
-            
-            if (userRole) {
-                // Set auth cookie with role (expiring in 7 days)
-                setCookie("auth_session", JSON.stringify({ role: userRole, email, name: userName }), { maxAge: 60 * 60 * 24 * 7 });
-                router.push("/");
-            } else {
-                setError("Email atau Password salah. Silakan coba lagi.");
-                setIsLoading(false);
-            }
-        }, 1500);
-    };
+    // Modern React 19 form state handling
+    const [state, formAction, isPending] = useActionState(loginAction, null);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
-        setError("");
+        setIsRegistering(true);
+        setRegisterError("");
 
         if (!fullName.trim()) {
-            setError("Nama lengkap harus diisi");
-            setIsLoading(false);
+            setRegisterError("Nama lengkap harus diisi");
+            setIsRegistering(false);
             return;
         }
 
         if (!phone.trim() || phone.length < 10) {
-            setError("Nomor WhatsApp harus valid (minimal 10 digit)");
-            setIsLoading(false);
+            setRegisterError("Nomor WhatsApp harus valid (minimal 10 digit)");
+            setIsRegistering(false);
             return;
         }
 
-        // Simulated registration with pending verification
-        setTimeout(() => {
-            try {
-                // Store pending user data in localStorage for admin verification
-                const pendingUsers = JSON.parse(localStorage.getItem("pending_users") || "[]");
-                const existingEmail = pendingUsers.some((u: any) => u.email === email);
-                
-                if (existingEmail) {
-                    setError("Email sudah terdaftar. Silakan coba login atau gunakan email lain.");
-                    setIsLoading(false);
-                    return;
-                }
+        // Refactored to be instant (Fast & Responsive)
+        try {
+            const pendingUsers = JSON.parse(localStorage.getItem("pending_users") || "[]");
+            const existingEmail = pendingUsers.some((u: any) => u.email === email);
 
-                const newUser = {
-                    id: Date.now().toString(),
-                    email,
-                    fullName,
-                    phone,
-                    createdAt: new Date().toISOString(),
-                    status: "pending"
-                };
-
-                pendingUsers.push(newUser);
-                localStorage.setItem("pending_users", JSON.stringify(pendingUsers));
-
-                setError("");
-                alert("✓ Pendaftaran berhasil!\n\nAkun Anda sedang menunggu verifikasi admin.\nAnda akan menerima notifikasi via WhatsApp setelah disetujui.");
-                
-                // Reset form and go back to login
-                setMode("login");
-                setEmail("");
-                setPassword("");
-                setFullName("");
-                setPhone("");
-            } catch (err) {
-                setError("Terjadi kesalahan saat pendaftaran. Silakan coba lagi.");
-            } finally {
-                setIsLoading(false);
+            if (existingEmail) {
+                setRegisterError("Email sudah terdaftar. Silakan coba login atau gunakan email lain.");
+                setIsRegistering(false);
+                return;
             }
-        }, 1500);
+
+            const newUser = {
+                id: Date.now().toString(),
+                email,
+                fullName,
+                phone,
+                createdAt: new Date().toISOString(),
+                status: "pending"
+            };
+
+            pendingUsers.push(newUser);
+            localStorage.setItem("pending_users", JSON.stringify(pendingUsers));
+
+            alert("✓ Pendaftaran berhasil!\n\nAkun Anda sedang menunggu verifikasi admin.\nAnda akan menerima notifikasi via WhatsApp setelah disetujui.");
+
+            setMode("login");
+            setEmail("");
+            setPassword("");
+            setFullName("");
+            setPhone("");
+        } catch (err) {
+            setRegisterError("Terjadi kesalahan saat pendaftaran. Silakan coba lagi.");
+        } finally {
+            setIsRegistering(false);
+        }
     };
 
     return (
@@ -114,7 +81,7 @@ export default function LoginPage() {
                     </div>
                     <h1 className="text-2xl font-bold tracking-tight">HUT IBI Pekalongan</h1>
                     <p className="text-muted-foreground text-sm">
-                        {mode === "login" 
+                        {mode === "login"
                             ? "Masuk untuk mengelola kegiatan & keuangan"
                             : "Daftarkan akun baru Anda"}
                     </p>
@@ -124,17 +91,17 @@ export default function LoginPage() {
                 <Card className="border-border/40 shadow-2xl">
                     <CardContent className="p-6">
                         {mode === "login" ? (
-                            <form onSubmit={handleLogin} className="space-y-5">
+                            <form action={formAction} className="space-y-5">
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold flex items-center">
                                         <Mail size={14} className="mr-2 text-primary" />
                                         Email Pengguna
                                     </label>
                                     <input
+                                        name="email"
                                         type="email"
                                         required
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        defaultValue={email}
                                         placeholder="sarahsafitri33@gmail.com"
                                         className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium text-base"
                                     />
@@ -146,27 +113,26 @@ export default function LoginPage() {
                                         Kata Sandi
                                     </label>
                                     <input
+                                        name="password"
                                         type="password"
                                         required
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
                                         className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base"
                                     />
                                 </div>
 
-                                {error && (
+                                {state?.error && (
                                     <p className="text-xs text-rose-500 font-medium bg-rose-50 p-3 rounded-lg border border-rose-100">
-                                        {error}
+                                        {state.error}
                                     </p>
                                 )}
 
                                 <button
                                     type="submit"
-                                    disabled={isLoading}
+                                    disabled={isPending}
                                     className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/30 active:scale-95 transition-transform disabled:opacity-50 flex items-center justify-center text-base"
                                 >
-                                    {isLoading ? (
+                                    {isPending ? (
                                         <Loader2 className="animate-spin mr-2" size={20} />
                                     ) : (
                                         "Masuk Sekarang"
@@ -229,18 +195,18 @@ export default function LoginPage() {
                                     />
                                 </div>
 
-                                {error && (
+                                {registerError && (
                                     <p className="text-xs text-rose-500 font-medium bg-rose-50 p-3 rounded-lg border border-rose-100">
-                                        {error}
+                                        {registerError}
                                     </p>
                                 )}
 
                                 <button
                                     type="submit"
-                                    disabled={isLoading}
+                                    disabled={isRegistering}
                                     className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/30 active:scale-95 transition-transform disabled:opacity-50 flex items-center justify-center text-base"
                                 >
-                                    {isLoading ? (
+                                    {isRegistering ? (
                                         <Loader2 className="animate-spin mr-2" size={20} />
                                     ) : (
                                         <>
@@ -259,7 +225,7 @@ export default function LoginPage() {
                                     type="button"
                                     onClick={() => {
                                         setMode("login");
-                                        setError("");
+                                        setRegisterError("");
                                         setEmail("");
                                         setPassword("");
                                         setFullName("");
