@@ -15,18 +15,30 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { getCookie } from "cookies-next";
 
 export default function Home() {
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
   const [finance, setFinance] = useState({ balance: 0, percentage: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  const [userName, setUserName] = useState("User");
 
   useEffect(() => {
     fetchDashboardData();
+
+    // Get user name from cookie
+    const session = getCookie("auth_session");
+    if (session) {
+      try {
+        const parsed = JSON.parse(String(session));
+        if (parsed.name) setUserName(parsed.name);
+      } catch (e) { }
+    }
   }, []);
 
   const fetchDashboardData = async () => {
     try {
+      // 1. Fetch upcoming events
       const { data: events, error: eError } = await supabase
         .from("events")
         .select("*")
@@ -35,6 +47,7 @@ export default function Home() {
 
       if (eError) throw eError;
 
+      // 2. Fetch transactions for balance calculation
       const { data: transactions, error: tError } = await supabase
         .from("transactions")
         .select("amount, type");
@@ -45,8 +58,19 @@ export default function Home() {
       const expense = transactions?.filter(t => t.type === 'expense').reduce((sum, t) => sum + (t.amount || 0), 0) || 0;
       const balance = income - expense;
 
-      const maxBudget = 50000000;
-      const percentage = Math.min(100, Math.round((expense / maxBudget) * 100));
+      // 3. Fetch budget from database (removing mockup)
+      const { data: budgetData, error: bError } = await supabase
+        .from("budgets")
+        .select("pagu_budget");
+
+      if (bError) throw bError;
+
+      const totalPagu = budgetData?.reduce((sum, b) => sum + Number(b.pagu_budget || 0), 0) || 0;
+
+      // Calculate percentage based on REAL pagu budget from database
+      // Fallback to a sensible number if totalPagu is 0 to avoid Division by Zero
+      const effectivePagu = totalPagu > 0 ? totalPagu : 1;
+      const percentage = Math.min(100, Math.round((expense / effectivePagu) * 100));
 
       setUpcomingEvents(events || []);
       setFinance({ balance, percentage });
@@ -62,7 +86,7 @@ export default function Home() {
       {/* Header Sapaan */}
       <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-foreground">Selamat Siang, Ibu Bidan! 👋</h1>
+          <h1 className="text-xl lg:text-2xl font-bold text-foreground">Selamat Siang, {userName}! 👋</h1>
           <p className="text-muted-foreground text-sm">Mari sukseskan HUT IBI Ke-75 Kota Pekalongan.</p>
         </div>
         {/* Desktop quick-action buttons (inline, not floating) */}

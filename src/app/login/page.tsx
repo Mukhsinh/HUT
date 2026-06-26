@@ -2,11 +2,12 @@
 
 import React, { useState, useActionState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/Card";
-import { Loader2, Lock, Mail, ShieldCheck, UserPlus, ArrowLeft } from "lucide-react";
+import { Loader2, Lock, Mail, ShieldCheck, UserPlus, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { loginAction } from "./actions";
 
 export default function LoginPage() {
     const [mode, setMode] = useState<"login" | "register">("login");
+    const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState("");
@@ -76,11 +77,11 @@ export default function LoginPage() {
             <div className="w-full max-w-md space-y-6">
                 {/* Header */}
                 <div className="text-center space-y-2">
-                    <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-primary/20 mb-6">
-                        <ShieldCheck size={40} className="text-white" />
+                    <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-primary/20 mb-6 overflow-hidden p-2">
+                        <img src="/logo IBI.png" alt="Logo IBI" className="w-full h-full object-contain" />
                     </div>
-                    <h1 className="text-2xl font-bold tracking-tight">HUT IBI Pekalongan</h1>
-                    <p className="text-muted-foreground text-sm">
+                    <h1 className="text-2xl font-bold tracking-tight text-primary">HUT IBI Pekalongan</h1>
+                    <p className="text-muted-foreground text-sm font-medium">
                         {mode === "login"
                             ? "Masuk untuk mengelola kegiatan & keuangan"
                             : "Daftarkan akun baru Anda"}
@@ -112,13 +113,22 @@ export default function LoginPage() {
                                         <Lock size={14} className="mr-2 text-primary" />
                                         Kata Sandi
                                     </label>
-                                    <input
-                                        name="password"
-                                        type="password"
-                                        required
-                                        placeholder="••••••••"
-                                        className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            name="password"
+                                            type={showPassword ? "text" : "password"}
+                                            required
+                                            placeholder="••••••••"
+                                            className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base pr-12"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {state?.error && (
@@ -185,14 +195,23 @@ export default function LoginPage() {
                                         <Lock size={14} className="mr-2 text-primary" />
                                         Kata Sandi
                                     </label>
-                                    <input
-                                        type="password"
-                                        required
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="••••••••"
-                                        className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-base"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            required
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="••••••••"
+                                            className="w-full p-4 bg-muted/30 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-base pr-12"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {registerError && (

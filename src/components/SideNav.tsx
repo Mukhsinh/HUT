@@ -17,6 +17,17 @@ export default function SideNav() {
 
   return (
     <aside className="w-56 shrink-0 sticky top-0 h-screen bg-white border-r border-border/50 flex flex-col">
+      <div className="p-6 border-b border-border/30">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/10 overflow-hidden p-1 border border-primary/5">
+            <img src="/logo IBI.png" alt="Logo IBI" className="w-full h-full object-contain" />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-primary leading-tight">HUT IBI</h2>
+            <p className="text-[10px] text-muted-foreground font-semibold">Pekalongan</p>
+          </div>
+        </div>
+      </div>
       <div className="flex-1 py-6 px-3 space-y-1">
         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-3 mb-4">Menu Utama</p>
         {navItems.map((item) => {
@@ -26,11 +37,10 @@ export default function SideNav() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive
+              className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
                   ? "bg-primary text-white shadow-md shadow-primary/20"
                   : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
-              }`}
+                }`}
             >
               <Icon size={18} className={isActive ? "text-white" : "text-muted-foreground group-hover:text-primary"} />
               <span className="text-sm font-semibold">{item.name}</span>
