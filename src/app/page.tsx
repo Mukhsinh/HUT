@@ -21,17 +21,31 @@ export default function Home() {
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
   const [finance, setFinance] = useState({ balance: 0, percentage: 0 });
   const [isLoading, setIsLoading] = useState(true);
-  const [userName, setUserName] = useState("User");
+
+  // Try to pre-load userName from cookie if available to avoid "User" flicker
+  const [userName, setUserName] = useState<string>(() => {
+    try {
+      const session = getCookie("auth_session");
+      if (session) {
+        const parsed = JSON.parse(String(session));
+        if (parsed.name) return parsed.name;
+        if (parsed.email === "sarahsafitri33@gmail.com") return "Sarah Safitri";
+      }
+    } catch (e) { }
+    return "User";
+  });
 
   useEffect(() => {
     fetchDashboardData();
 
-    // Get user name from cookie
+    // Client-side refresh for user data consistency
     const session = getCookie("auth_session");
     if (session) {
       try {
         const parsed = JSON.parse(String(session));
         if (parsed.name) setUserName(parsed.name);
+        else if (parsed.email === "sarahsafitri33@gmail.com") setUserName("Sarah Safitri");
+        else if (parsed.email === "panitia@bidan.com") setUserName("Panitia");
       } catch (e) { }
     }
   }, []);
