@@ -3,14 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { FullscreenFormModal } from "@/components/FullscreenFormModal";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { Doughnut } from "react-chartjs-2";
 import { Plus, ArrowUpRight, ArrowDownRight, Wallet, Loader2, Lock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getCookie } from "cookies-next";
 import { getRoleFromCookie } from "@/lib/permissions";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
 
 const toLocalDateString = (dateObj: Date) => {
     const tzOffset = dateObj.getTimezoneOffset() * 60000; // offset in milliseconds
@@ -35,7 +32,7 @@ export default function FinanceDashboard() {
     const [transactionType, setTransactionType] = useState<"income" | "expense">("income");
     const [isLoading, setIsLoading] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [showTransactions, setShowTransactions] = useState(false);
+    const [showTransactions, setShowTransactions] = useState(true);
     const [formData, setFormData] = useState(getInitialFormData());
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +89,6 @@ export default function FinanceDashboard() {
 
     const [transactions, setTransactions] = useState<any[]>([]);
     const [totals, setTotals] = useState({ income: 0, expense: 0, balance: 0 });
-    const [budgetTarget, setBudgetTarget] = useState("50000000");
 
     useEffect(() => {
         const authSession = getCookie("auth_session");
@@ -101,17 +97,11 @@ export default function FinanceDashboard() {
             setRole(userRole);
         }
 
-        const savedBudget = localStorage.getItem("ibi_budget");
-        if (savedBudget) {
-            setBudgetTarget(savedBudget);
-        }
+
         fetchTransactions();
     }, []);
 
-    const handleSaveBudget = () => {
-        localStorage.setItem("ibi_budget", budgetTarget);
-        alert("Pagu anggaran berhasil disimpan!");
-    };
+
 
     const fetchTransactions = async () => {
         try {
@@ -142,16 +132,7 @@ export default function FinanceDashboard() {
         }
     };
 
-    const budgetVal = parseFloat(budgetTarget) || 0;
 
-    const options = {
-        cutout: "75%",
-        plugins: {
-            legend: {
-                display: false,
-            },
-        },
-    };
 
     return (
         <div className="space-y-6 pb-20">
@@ -316,7 +297,7 @@ export default function FinanceDashboard() {
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4">
                 <Card className="bg-white">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between">
@@ -337,132 +318,52 @@ export default function FinanceDashboard() {
                         <p className="text-lg font-bold">Rp {totals.expense.toLocaleString("id-ID")}</p>
                     </CardContent>
                 </Card>
-                <Card className="bg-white hidden lg:block">
-                    <CardContent className="p-4">
-                        <div className="flex items-center space-x-2 text-emerald-600 mb-1">
-                            <Wallet size={16} />
-                            <span className="text-[10px] font-bold uppercase tracking-wider">Saldo Bersih</span>
-                        </div>
-                        <p className="text-lg font-bold">Rp {totals.balance.toLocaleString("id-ID")}</p>
-                    </CardContent>
-                </Card>
-                <Card className="bg-white hidden lg:block">
-                    <CardContent className="p-4">
-                        <div className="flex items-center space-x-2 text-amber-500 mb-1">
-                            <ArrowUpRight size={16} />
-                            <span className="text-[10px] font-bold uppercase tracking-wider">Realisasi</span>
-                        </div>
-                        <p className="text-lg font-bold">{budgetVal > 0 ? Math.round((totals.expense / budgetVal) * 100) : 0}%</p>
-                        <p className="text-[10px] text-muted-foreground">dari pagu anggaran</p>
-                    </CardContent>
-                </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <h3 className="font-semibold">Realisasi RKA</h3>
-                    </CardHeader>
-                    <CardContent className="flex items-center justify-between py-6">
-                        <div className="w-32 h-32 relative">
-                            <Doughnut
-                                data={{
-                                    labels: ["Realisasi", "Sisa Pagu"],
-                                    datasets: [
-                                        {
-                                            data: [totals.expense, Math.max(0, budgetVal - totals.expense)],
-                                            backgroundColor: ["#FF69B4", "#FCE4EC"],
-                                            borderColor: ["#FF69B4", "#ffffff"],
-                                            borderWidth: 1,
-                                        },
-                                    ],
-                                }}
-                                options={options}
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                <span className="text-xl font-bold text-primary">
-                                    {budgetVal > 0 ? Math.round((totals.expense / budgetVal) * 100) : 0}%
-                                </span>
-                                <span className="text-[8px] text-muted-foreground uppercase">Terpakai</span>
-                            </div>
-                        </div>
-                        <div className="flex-1 ml-6 space-y-3">
-                            <div className="flex items-center text-sm">
-                                <div className="w-3 h-3 rounded-full bg-primary mr-2" />
-                                <span className="text-muted-foreground flex-1">Realisasi</span>
-                                <span className="font-semibold text-primary">Rp {totals.expense.toLocaleString("id-ID")}</span>
-                            </div>
-                            <div className="flex items-center text-sm">
-                                <div className="w-3 h-3 rounded-full bg-secondary mr-2" />
-                                <span className="text-muted-foreground flex-1">Sisa Pagu</span>
-                                <span className="font-semibold text-secondary-foreground">Rp {Math.max(0, budgetVal - totals.expense).toLocaleString("id-ID")}</span>
-                            </div>
-                        </div>
-                    </CardContent>
-                    <div className="px-6 pb-6 pt-2 border-t border-border mt-2">
-                        <label className="text-xs font-semibold text-muted-foreground">Pagu Anggaran Kegiatan (Rp)</label>
-                        <div className="flex items-center space-x-2 mt-1">
-                            <input
-                                type="number"
-                                value={budgetTarget}
-                                onChange={(e) => setBudgetTarget(e.target.value)}
-                                className="flex-1 p-3 bg-secondary/30 border border-border rounded-xl text-sm font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                            />
-                            <button
-                                onClick={handleSaveBudget}
-                                className="bg-primary text-white font-semibold py-3 px-4 rounded-xl text-sm hover:bg-primary/90 transition-colors"
-                            >
-                                Simpan
-                            </button>
-                        </div>
-                    </div>
-                </Card>
-
-                <Card className="border-none shadow-none bg-transparent lg:border lg:shadow-sm lg:bg-white">
-                    <CardHeader className="p-0 lg:px-5 lg:pt-5 mb-4 flex flex-row items-center justify-between">
-                        <h3 className="font-bold text-lg">History Transaksi</h3>
-                        <button
-                            onClick={() => setShowTransactions(!showTransactions)}
-                            className="text-primary text-sm font-bold bg-white px-4 py-2 rounded-full border border-primary/20 shadow-sm"
-                        >
-                            {showTransactions ? "Sembunyikan" : "Tampilkan Semua"}
-                        </button>
-                    </CardHeader>
-                    {showTransactions && (
-                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300 lg:px-5 lg:pb-5 max-h-96 overflow-y-auto">
-                            {transactions.map((t) => (
-                                <div key={t.id} className="bg-white p-4 rounded-2xl flex items-center justify-between border border-primary/5 shadow-sm">
-                                    <div className="flex items-center space-x-3">
-                                        <div className={`p-2 rounded-xl ${t.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
-                                            {t.type === 'income' ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-sm">{t.category}</p>
-                                            <p className="text-[10px] text-muted-foreground">{new Date(t.created_at).toLocaleDateString("id-ID", { day: '2-digit', month: 'short', year: 'numeric' })} • {t.note || "-"}</p>
-                                        </div>
+            <Card>
+                <CardHeader className="px-5 pt-5 pb-3 flex flex-row items-center justify-between">
+                    <h3 className="font-bold text-lg">History Transaksi</h3>
+                    <button
+                        onClick={() => setShowTransactions(!showTransactions)}
+                        className="text-primary text-sm font-bold bg-white px-4 py-2 rounded-full border border-primary/20 shadow-sm cursor-pointer hover:bg-primary/5 transition-colors"
+                    >
+                        {showTransactions ? "Sembunyikan" : "Tampilkan Semua"}
+                    </button>
+                </CardHeader>
+                {showTransactions && (
+                    <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300 px-5 pb-5 max-h-[calc(100vh-380px)] overflow-y-auto">
+                        {transactions.map((t) => (
+                            <div key={t.id} className="bg-white p-4 rounded-2xl flex items-center justify-between border border-primary/5 shadow-sm">
+                                <div className="flex items-center space-x-3">
+                                    <div className={`p-2 rounded-xl ${t.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                                        {t.type === 'income' ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
                                     </div>
-                                    <div className="flex flex-col items-end">
-                                        <p className={`font-bold text-sm ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                            {t.type === 'income' ? '+' : '-'} Rp {t.amount.toLocaleString("id-ID")}
-                                        </p>
-                                        {canEditTransactions && (
-                                            <button
-                                                onClick={() => handleEdit(t)}
-                                                className="text-[10px] font-bold text-primary mt-1 hover:underline"
-                                            >
-                                                Edit
-                                            </button>
-                                        )}
+                                    <div>
+                                        <p className="font-bold text-sm">{t.category}</p>
+                                        <p className="text-[10px] text-muted-foreground">{new Date(t.created_at).toLocaleDateString("id-ID", { day: '2-digit', month: 'short', year: 'numeric' })} • {t.note || "-"}</p>
                                     </div>
                                 </div>
-                            ))}
-                            {transactions.length === 0 && (
-                                <p className="text-center py-10 text-muted-foreground text-sm italic">Belum ada transaksi</p>
-                            )}
-                        </div>
-                    )}
-                </Card>
-            </div>
+                                <div className="flex flex-col items-end">
+                                    <p className={`font-bold text-sm ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                        {t.type === 'income' ? '+' : '-'} Rp {t.amount.toLocaleString("id-ID")}
+                                    </p>
+                                    {canEditTransactions && (
+                                        <button
+                                            onClick={() => handleEdit(t)}
+                                            className="text-[10px] font-bold text-primary mt-1 hover:underline cursor-pointer"
+                                        >
+                                            Edit
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        {transactions.length === 0 && (
+                            <p className="text-center py-10 text-muted-foreground text-sm italic">Belum ada transaksi</p>
+                        )}
+                    </div>
+                )}
+            </Card>
         </div>
     );
 }
